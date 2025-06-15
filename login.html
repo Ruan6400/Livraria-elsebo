@@ -52,6 +52,11 @@
             let login = {}
             const inputs = Array.from(document.querySelectorAll('input'))
             inputs.forEach(x=>login[x.name]=x.value)
+            document.body.insertAdjacentHTML('beforeend',`,
+                 <div id="loading">
+                    <img src="img/Sem título.png">
+                </div>
+            `)
             
             const resposta = await fetch('https://elsebo.onrender.com/public/login',{
                 method:'POST',
@@ -69,6 +74,7 @@
             }else{
                 alert('Login ou senha inválidos');
             }
+            document.getElementById('loading').remove()
             form.reset();
         })
         document.addEventListener('DOMContentLoaded',Autologin)

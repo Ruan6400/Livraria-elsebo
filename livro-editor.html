@@ -99,7 +99,7 @@
             <button type="button">Fechar</button>
         </form>
     </div>
-
+   
     <script>
          const token = localStorage.getItem('token')
 
@@ -139,11 +139,16 @@
 
                         Deseja excluir esse livro?
                     `)){
+                        document.body.insertAdjacentHTML('beforeend',`
+                                <div id="loading">
+                                    <img src="img/Sem título.png">
+                                </div>`)
                         const response = await fetch("https://elsebo.onrender.com/protected/livro/"+livro.id,{
                             method:'DELETE',
                             headers:{'Authorization':'Bearer '+token}
                         }).then(res=>res.text())
                         alert(response)
+                        document.getElementById('loading').remove()
                     }
                 })
 
@@ -209,12 +214,17 @@
                 if((!values.includes("")||!values.includes(null))&&
                     confirm('Deseja prosseguir com as alterações?')
                 ){
+                    document.body.insertAdjacentHTML('beforeend',`
+                                <div id="loading">
+                                    <img src="img/Sem título.png">
+                                </div>`)
                     const resposta = await fetch('https://elsebo.onrender.com/protected/livro/',{
                         method:'PUT',
                         headers:{'Authorization':'Bearer '+token},
                         body:formData
                     }).then(res=>res.text())
                     console.log(resposta)
+                    document.getElementById('loading').remove()
                 }
             })
         }
@@ -237,6 +247,10 @@
                     return;
                 }
                 const formData = new FormData(form)
+                document.body.insertAdjacentHTML('beforeend',`
+                                <div id="loading">
+                                    <img src="img/Sem título.png">
+                                </div>`)
                 const url = new URL('https://elsebo.onrender.com/protected/livro/')
                 const resposta = await fetch(url,
                     {
@@ -245,7 +259,9 @@
                         body:formData
                     }
                 ).then(res=>res.text())
-                console.log(resposta)         
+                console.log(resposta)
+                alert(resposta)
+                document.getElementById('loading').remove()    
             })
         }
 

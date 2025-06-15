@@ -76,6 +76,10 @@
                         o nome ${editora.nome} será mudado para:
                         ${newName}. Deseja confirmar essa alteração?
                     `)){
+                        document.body.insertAdjacentHTML('beforeend',`
+                                <div id="loading">
+                                    <img src="img/Sem título.png">
+                                </div>`)
                         try{
                             const alterar = await fetch("https://elsebo.onrender.com/protected/editora/",{
                                 method:'POST',
@@ -87,8 +91,10 @@
                             }).then(res=>res.text())
                             alert(alterar)
                         }catch(erro){
+                            alert(erro)
                             console.error(erro)
                         }
+                        document.getElementById('loading').remove()
                     }
                 })
 
@@ -99,6 +105,10 @@
 
                         tem certeza que deseja excluir essa editora?
                     `)){
+                        document.body.insertAdjacentHTML('beforeend',`
+                                <div id="loading">
+                                    <img src="img/Sem título.png">
+                                </div>`)
                         try{
                             const deletar = await fetch('https://elsebo.onrender.com/protected/editora/'+editora.id,
                                 {
@@ -110,6 +120,7 @@
                         }catch(erro){
                             console.error(erro)
                         }
+                        document.getElementById('loading').remove()
                     }
                 })
 
@@ -124,6 +135,10 @@
                 `${nome_autor}
 
                 Deseja cadastar essa editora?`)){
+                    document.body.insertAdjacentHTML('beforeend',`
+                                <div id="loading">
+                                    <img src="img/Sem título.png">
+                                </div>`)
                 const cadastrar = await fetch("https://elsebo.onrender.com/protected/editora/",{
                     method:'POST',
                     headers:{
@@ -133,6 +148,7 @@
                     body:JSON.stringify({nome:nome_autor})
                 }).then(res=>res.text())
                 alert(cadastrar)
+                document.getElementById('loading').remove()
             }
         })
         document.addEventListener('DOMContentLoaded',IniciarAutores)
