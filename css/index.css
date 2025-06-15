@@ -1,0 +1,46 @@
+@font-face {
+    font-family: 'Antiqua';
+    src: url(../fonts/inknut-antiqua/InknutAntiqua-Bold.ttf) format('truetype');
+}
+
+body{
+    margin: 0 auto;
+    font-family: 'Times New Roman', Times, serif;
+    max-width: 1800px;
+}
+header{
+    border: 7px solid #000;
+    max-width: 1800px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header a{
+    border: 2px solid black;
+    padding: 5px;
+}
+header a:hover{
+    background-color: black;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+header a:active{
+    display: inline-block;
+    background-color: white;
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+    transform: scale(0.9);
+}
+h1{
+    font-family: 'Antiqua', serif;
+    font-weight: bold;
+    font-size: 2.5em;
+    text-align: center;
+    margin-top: 20px;
+    text-align: start;
+    margin-left: 20px;
+}
+

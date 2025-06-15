@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="css/index.css" rel="stylesheet">
+    <link href="css/all.css" rel="stylesheet">
+</head>
+<style>
+    form * {
+        display: block;
+        margin: 10px;
+    }
+</style>
+<body>
+    <header>
+        <h1>El sebo</h1>
+    </header>
+    <form>
+        <label for="login">Login</label>
+        <input type="text" id="login" name="user" placeholder="Digite seu login" required>
+        <label for="password">Senha</label>
+        <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+        <button id="uploadButton">Login</button>
+    </form>
+
+
+   <script>
+        async function Autologin(){
+            let token = localStorage.getItem('token');
+            if(token){
+                let response = await fetch('https://elsebo.onrender.com/protected/autologin',{
+                    method:'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if(response.ok){
+                    window.location.href = 'dashboard.html';
+                }else{
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('cargo');
+                    alert('Sessão expirada, faça login novamente');
+                }
+            }
+        }
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let login = {}
+            const inputs = Array.from(document.querySelectorAll('input'))
+            inputs.forEach(x=>login[x.name]=x.value)
+            
+            const resposta = await fetch('https://elsebo.onrender.com/public/login',{
+                method:'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(login)
+            }).then(res => res.json());
+            //console.log(resposta);
+            if(resposta.token){
+                localStorage.setItem('token', resposta.token);
+                localStorage.setItem('cargo', resposta.cargo);
+                console.log(resposta)
+                window.location.href = 'dashboard.html';
+            }else{
+                alert('Login ou senha inválidos');
+            }
+            form.reset();
+        })
+        document.addEventListener('DOMContentLoaded',Autologin)
+   </script>
+</body>
+</html>

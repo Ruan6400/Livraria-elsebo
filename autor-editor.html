@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/index.css" rel="stylesheet">
+    <link href="css/all.css" rel="stylesheet">
+    <style>
+        table{
+            max-width: 500px;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+    <title>Gerenciar Autores</title>
+</head>
+<body>
+    <header>
+        <h1>El sebo</h1>
+    </header>
+    <ul>
+        <li><a href="dashboard.html">Voltar</a></li>
+        <li><a href="editora-editor.html">Gerenciar Editoras</a></li>
+        <li><a href="livro-editor.html">Gerenciar Livros</a></li>
+    </ul>
+    <h2>Lista de autores</h2>
+    <table>
+        <thead>
+            <tr>
+                <td>Nome do autor</td>
+                <td>Delertar</td>
+                <td>Editar</td>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <h2>Adicionar novo autor</h2>
+    <input type="text" id="nome" name="nome" placeholder="Digite o nome do autor">
+    <button>Confirmar</button>
+
+    <script>
+        const token = localStorage.getItem('token')
+        async function IniciarAutores(){
+            
+            const autores = await fetch("https://elsebo.onrender.com/protected/autor/all",
+                {
+                    method:"GET",
+                    headers:{'Authorization':`Bearer ${token}`}
+                }
+            ).then(res=>{
+                if(!res.ok){
+                    localStorage.removeItem('cargo')
+                    localStorage.removeItem('token')
+                    window.location.assign('login.html')
+                    alert('Login expirado')
+                    return;
+                }
+                return res.json()
+            })
+            autores.forEach(autor=>{
+                document.querySelector('tbody').insertAdjacentHTML('beforeend',`
+                    <tr>
+                        <td>${autor.nome}</td>
+                        <td><button>Editar</button></td>
+                        <td><button>Excluir</button></td>
+                    </tr>`)
+                let bt_edit=document.querySelector('tbody>tr:last-of-type>td:nth-of-type(2)>button')
+                let bt_del=document.querySelector('tbody>tr:last-of-type>td:last-of-type>button')
+                    
+                bt_edit.addEventListener('click',async ()=>{
+                    const newName = prompt("Digite o novo nome do autor")
+                    if(newName!=null&&confirm(`
+                        o nome ${autor.nome} será mudado para:
+                        ${newName}. Deseja confirmar essa alteração?
+                    `)){
+                        try{
+                            const alterar = await fetch("https://elsebo.onrender.com/protected/autor/",{
+                                method:'POST',
+                                headers:{
+                                    'Content-Type':'application/json',
+                                    'Authorization':'Bearer '+token
+                                },
+                                body:JSON.stringify({id:autor.id,nome:newName})
+                            }).then(res=>res.text())
+                            alert(alterar)
+                        }catch(erro){
+                            console.error(erro)
+                        }
+                    }
+                })
+
+
+                bt_del.addEventListener('click',async ()=>{
+                    if(confirm(`
+                        ${autor.nome}
+
+                        tem certeza que deseja excluir esse autor?
+                    `)){
+                        try{
+                            const deletar = await fetch('https://elsebo.onrender.com/protected/autor/'+autor.id,
+                                {
+                                    method:'DELETE',
+                                    headers:{'Authorization':`Bearer ${token}`}
+                                }
+                            ).then(res=>res.text())
+                            alert(deletar)
+                        }catch(erro){
+                            console.error(erro)
+                        }
+                    }
+                })
+
+            })
+        }
+
+
+        const btn_cadastro = document.querySelector('body>button')
+        btn_cadastro.addEventListener('click',async ()=>{
+            const nome_autor = document.querySelector('body>input').value
+            if(nome_autor!=null&&confirm(`
+                ${nome_autor}
+
+                Deseja cadastar esse autor?
+            `)){
+                const cadastrar = await fetch("https://elsebo.onrender.com/protected/autor/",{
+                    method:'POST',
+                    headers:{
+                        'Content-Type':'application/json',
+                        'Authorization':'Bearer '+token
+                    },
+                    body:JSON.stringify({nome:nome_autor})
+                })
+            }
+        })
+        document.addEventListener('DOMContentLoaded',IniciarAutores)
+    </script>
+</body>
+</html>

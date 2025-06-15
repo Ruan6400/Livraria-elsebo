@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadatro</title>
+    <link href="css/index.css" rel="stylesheet">
+    <link href="css/all.css" rel="stylesheet">
+    <style>
+    form * {
+        display: block;
+        margin: 10px;
+    }
+</style>
+</head>
+<body>
+    <header>
+        <h1>El sebo</h1>
+    </header>
+    <a href="dashboard.html"><button id="backButton">Voltar</button></a>
+    <form>
+        <label for="name">Nome</label>
+        <input type="text" id="name" name="nome" placeholder="Digite seu nome" required>
+
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Digite seu email" required>
+
+
+        <label for="password">Senha</label>
+        <input type="password" id="password" name="senha" placeholder="Digite sua senha" required>
+        <label for="confirmPassword">Confirme a Senha</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirme sua senha" required>
+
+        <label for="cpf">CPF</label>
+        <input type="text" step="1" id="cpf" name="cpf" placeholder="Digite seu CPF" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" size="14" maxlength="14" title="Formato: 000.000.000-00">
+
+        <label for="phone">Telefone</label>
+        <input type="tel" id="phone" name="telefone" placeholder="Digite seu telefone" required pattern="\(\d{2}\) \d{4,5}-\d{4}" size="15" maxlength="15" title="Formato: (00) 0000-0000 ou (00) 00000-0000">
+
+
+        <label for="endereco">Endereço</label>
+        <input type="text" id="endereco" name="endereco" placeholder="Digite seu endereço" required>
+
+
+        <label for="cargo">Cargo</label>
+        <select id="cargo" name="cargo" required>
+            <option value="" disabled selected>Selecione seu cargo</option>
+            <option value="operacional">operacional</option>
+            <option value="gerente">Gerente</option>
+        </select>
+
+
+        <button id="registerButton">Cadastrar</button>
+
+
+    </form>
+
+    <script>
+
+        // Validação de telefone e CPF
+        const cpf = document.getElementById('cpf');
+        const phone = document.getElementById('phone');
+        document.addEventListener('keyup',(e)=>{
+
+            if(document.activeElement === cpf){
+                if(e.key !== 'Backspace' && e.key != 'Delete'){
+                    cpf.value = cpf.value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{2})/, '$1-$2');
+                }
+                if(cpf.value.length > 14){
+                    cpf.value = cpf.value.slice(0, 14);
+                }
+            }
+            if(document.activeElement === phone){
+                if(e.key !== 'Backspace' && e.key != 'Delete' && e.key != 'Backspace'){
+                    phone.value = phone.value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(phone.value.length<15?/(\d{4})(\d)/:/(\d{5})(\d)/, '$1-$2');
+                }
+                if(phone.value.length > 15){
+                    phone.value = phone.value.slice(0, 15);
+                }
+            }
+        })
+
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Você precisa estar logado para cadastrar um usuário.');
+                window.location.assign('index.html');
+                return;
+            }
+            const inputs = Array.from(document.querySelectorAll('input,select'));
+            const data = inputs.reduce((acc, input) => {
+                acc[input.name] = input.value;
+                return acc;
+            }, {});
+            // Validação de senha
+            if (data.senha !== data.confirmPassword) {
+                alert('As senhas não coincidem!');
+                return;
+            }
+
+            
+
+            // Envio dos dados para o servidor
+            try {
+                const response = await fetch('https://elsebo.onrender.com/protected/cadastrar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.status === 401) {
+                    alert('Sessão expirada. Faça login novamente.');
+                    localStorage.removeItem('token');
+                    window.location.assign('index.html');
+                    return;
+                }
+                
+
+                const result = await response.text();
+                if (result === 'Funcionario cadastrado com sucesso!') {
+                    alert('Usuário cadastrado com sucesso!');
+                    form.reset();
+                    window.location.assign('dashboard.html');
+                } else {
+                    throw new Error(result);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao cadastrar usuário. Tente novamente.');
+            }
+        });
+    </script>
+</body>
+</html>

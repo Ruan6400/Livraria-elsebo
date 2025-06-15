@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Document</title>
+    <link href="css/index.css" rel="stylesheet">
+    <link href="css/catalog.css" rel="stylesheet">
+    <link href="css/all.css" rel="stylesheet">
+</head>
+<style>
+    
+</style>
+<body>
+    <header>
+        <h1>El sebo</h1>
+
+        <ul>
+            <li><a href="login.html">Login</a></li>
+        </ul>
+    </header>
+    <h2>Catálogo de livros</h2>
+    <main>
+        
+    </main>
+   <script>
+        async function Livros() {
+            const livros = await fetch('https://elsebo.onrender.com/public/livros').then(res=>res.json())
+            livros.forEach(livro=>{
+                document.querySelector('main').insertAdjacentHTML('beforeend',
+                    `<div class="book-item">
+                        <img src="${livro.capa_url}">
+                        <p>${livro.titulo}</p>
+                        <p>Autor: ${livro.autor}</p>
+                        <p>Editora: ${livro.editora}</p>
+                    </div>`
+                )
+            })
+        }
+        document.addEventListener('DOMContentLoaded',Livros)
+    </script>
+</body>
+</html>

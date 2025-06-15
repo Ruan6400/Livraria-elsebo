@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Livros</title>
+    <link href="css/index.css" rel="stylesheet">
+    <link href="css/all.css" rel="stylesheet">
+    <style>
+        form *{
+            display: block;
+            margin: 10px 0;
+
+        }
+        #pop-up{
+            display: none;
+            position: fixed;
+            background-color: #fff9;
+            top:0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        #pop-up form{
+            position: absolute;
+            top:50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>El sebo</h1>
+    </header>
+    <ul>
+        <li><a href="dashboard.html">Voltar</a></li>
+        <li><a href="editora-editor.html">Gerenciar Editoras</a></li>
+        <li><a href="autor-editor.html">Gerenciar Autores</a></li>
+    </ul>
+    <h2>Lista de livros</h2>
+    <table>
+        <thead>
+            <tr>
+                <td>Nome do livro</td>
+                <td>Autor</td>
+                <td>Editora</td>
+                <td>Editar</td>
+                <td>Deletar</td>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+    <h2>Cadastro de Livros</h2>
+
+    <form>
+        <label for="nome">Nome do livro</label>
+        <input type="text" name="titulo" id="nome" placeholder="digite o nome do livro" required>
+
+
+        <label for="autor">Nome do autor</label>
+        <select name="autor" id="autor" required>
+            <option value="" disabled>Selecione um autor</option>
+        </select>
+
+        <label for="editora">Nome da editora</label>
+        <select name="editora" id="editora" required>
+            <option value="" disabled>Selecione uma editora</option>
+        </select>
+
+        <label for="file">Imagem de capa</label>
+        <input type="file" name="file" id="file">
+        <button>Cadastrar</button>
+    </form>
+    <div id="pop-up">
+        <form>
+            <input type="hidden" value="" id="id" name="id">
+            <label for="nome">Nome do livro</label>
+            <input type="text" name="titulo" id="nome2" required placeholder="digite o nome do livro">
+
+
+            <label for="autor">Nome do autor</label>
+            <select name="autor" id="autor2" required>
+                <option value="" disabled>Selecione um autor</option>
+            </select>
+
+            <label for="editora">Nome da editora</label>
+            <select name="editora" id="editora2" required>
+                <option value="" disabled>Selecione uma editora</option>
+            </select>
+
+            <label for="file">Imagem de capa</label>
+            <input type="file" name="file" id="file2">
+
+            <button>Atualizar Livro</button>
+            <button type="button">Fechar</button>
+        </form>
+    </div>
+
+    <script>
+         const token = localStorage.getItem('token')
+
+        async function IniciarLivros(){
+
+            const links_protegidos = document.querySelectorAll('li:has(>a:is([href*="autor"],[href*=editora]))')
+            console.log(links_protegidos)
+            const cargo = localStorage.getItem('cargo')
+            if(cargo=='operacional')
+                links_protegidos.forEach(el=>el.remove())
+            const bt_clpopup = document.querySelector('#pop-up button[type="button"]')
+            bt_clpopup.addEventListener('click',()=>document.getElementById('pop-up').style.display='none')
+            const livros = await fetch('https://elsebo.onrender.com/public/livros').then(res=>res.json())
+            const tbody = document.querySelector('tbody')
+            livros.forEach(livro=>{
+                tbody.insertAdjacentHTML('beforeend',
+                    `<tr>
+                        <td>${livro.titulo}</td>
+                        <td>${livro.autor}</td>
+                        <td>${livro.editora}</td>
+                        <td><button>Editar</button></td>
+                        <td><button>Excluir</button></td>
+                    </tr>`)
+                const btn_edit = document.querySelector('tr:last-of-type>td:nth-of-type(4)>button')
+                const btn_del = document.querySelector('tr:last-of-type>td:nth-of-type(5)>button')
+
+                btn_edit.addEventListener('click',()=>{
+                    alert('Altere as informações do livro')
+                    document.getElementById('nome2').value = livro.titulo
+                    document.getElementById('id').value = livro.id
+                    document.getElementById('pop-up').style.display="block"
+                })
+
+                btn_del.addEventListener('click',async()=>{
+                    if(confirm(`
+                        ${livro.titulo}
+
+                        Deseja excluir esse livro?
+                    `)){
+                        const response = await fetch("https://elsebo.onrender.com/protected/livro/"+livro.id,{
+                            method:'DELETE',
+                            headers:{'Authorization':'Bearer '+token}
+                        }).then(res=>res.text())
+                        alert(response)
+                    }
+                })
+
+
+            })
+
+
+            //listagem de editoras
+           const editoras = await fetch('https://elsebo.onrender.com/protected/editora/all',
+            {
+                method:'GET',
+                headers:{
+                    'Content-Type':'application/json',
+                    'Authorization':'Bearer '+token
+                }
+            }).then(res=>{
+                if(!res.ok){
+                    localStorage.removeItem('cargo')
+                    localStorage.removeItem('token')
+                    window.location.assign('login.html')
+                    alert('Login expirado')
+                    return;
+                }
+                return res.json()
+            })
+            const selec_ed = document.querySelector('#editora')
+            editoras.forEach(editora => {
+                selec_ed.insertAdjacentHTML('beforeend',
+                    `<option value="${editora.nome}">${editora.nome}</option>`)
+                document.querySelector('#editora2').insertAdjacentHTML('beforeend',
+                    `<option value="${editora.nome}">${editora.nome}</option>`)
+            });
+
+
+
+            //listagem de autores
+            const autores = await fetch('https://elsebo.onrender.com/protected/autor/all',
+            {
+                method:'GET',
+                headers:{
+                    'Content-Type':'application/json',
+                    'Authorization':'Bearer '+token
+                }
+            }).then(res=>res.json())
+            const selec_au = document.querySelector('#autor')
+            autores.forEach(autor => {
+                selec_au.insertAdjacentHTML('beforeend',
+                    `<option value="${autor.nome}">${autor.nome}</option>`)
+                document.querySelector('#autor2').insertAdjacentHTML('beforeend',
+                    `<option value="${autor.nome}">${autor.nome}</option>`)
+            });
+
+
+            //atualizar livros
+            const updateForm = document.querySelector('#pop-up form')
+            updateForm.addEventListener('submit',async (e)=>{
+                e.preventDefault()
+                const values = Array.from(document.querySelectorAll('#pop-up :is(input,select):not([type="file"])')).map(input=>input.value)
+                console.log(values)
+
+                const formData = new FormData(updateForm)
+
+                if((!values.includes("")||!values.includes(null))&&
+                    confirm('Deseja prosseguir com as alterações?')
+                ){
+                    const resposta = await fetch('https://elsebo.onrender.com/protected/livro/',{
+                        method:'PUT',
+                        headers:{'Authorization':'Bearer '+token},
+                        body:formData
+                    }).then(res=>res.text())
+                    console.log(resposta)
+                }
+            })
+        }
+
+
+
+
+
+        function CadastrarLivro() {
+            const form = document.querySelector('form')
+
+            form.addEventListener('submit',async (e)=>{
+                e.preventDefault()
+                const autor = document.querySelector('#autor').value
+                const editora = document.querySelector('#editora').value
+                const livro = document.querySelector('#nome').value
+                if(autor==""||editora == ""||livro==""){
+                    alert('preencha o nome do livro, e selecione autor e editora antes de cadastrar')
+                    form.reset()
+                    return;
+                }
+                const formData = new FormData(form)
+                const url = new URL('https://elsebo.onrender.com/protected/livro/')
+                const resposta = await fetch(url,
+                    {
+                        method:'POST',
+                        headers:{'Authorization':'Bearer '+token},
+                        body:formData
+                    }
+                ).then(res=>res.text())
+                console.log(resposta)         
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded',()=>{
+            IniciarLivros()
+            CadastrarLivro()
+        })
+    </script>
+</body>
+</html>
