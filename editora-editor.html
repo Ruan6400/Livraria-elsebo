@@ -131,7 +131,8 @@
                         'Authorization':'Bearer '+token
                     },
                     body:JSON.stringify({nome:nome_autor})
-                })
+                }).then(res=>res.text())
+                alert(cadastrar)
             }
         })
         document.addEventListener('DOMContentLoaded',IniciarAutores)
