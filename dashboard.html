@@ -34,11 +34,22 @@
             display: block;
             margin: 10px;
         }
+        header:has(>h1){
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a{
+            height: auto;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>El sebo</h1>
+        <ul>
+            <li><a href="index.html">Catálogo</a></li>
+        </ul>
     </header>
     <div>
         <button id="logout">Sair</button>
